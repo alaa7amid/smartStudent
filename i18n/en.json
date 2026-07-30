@@ -1,0 +1,38 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "next": "Next",
+    "back": "Back",
+    "done": "Done",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "networkError": "Network error. Please try again.",
+    "retry": "Retry",
+    "required": "This field is required"
+  },
+  "tabs": {
+    "home": "Home",
+    "search": "Search",
+    "notifications": "Notifications",
+    "profile": "Profile"
+  },
+  "settings": {
+    "language": "Language",
+    "english": "English",
+    "arabic": "العربية",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark"
+  },
+  "expoUi": {
+    "title": "Native UI (Expo UI)",
+    "description": "Components rendered with SwiftUI / Jetpack Compose via @expo/ui.",
+    "filled": "Filled",
+    "outlined": "Outlined",
+    "text": "Text",
+    "enableNotifications": "Enable notifications",
+    "pressed": "Button pressed"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "next": "التالي",
+    "back": "رجوع",
+    "done": "تم",
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ ما",
+    "networkError": "خطأ في الشبكة. حاول مرة أخرى.",
+    "retry": "إعادة المحاولة",
+    "required": "هذا الحقل مطلوب"
+  },
+  "tabs": {
+    "home": "الرئيسية",
+    "search": "البحث",
+    "notifications": "الإشعارات",
+    "profile": "الملف الشخصي"
+  },
+  "settings": {
+    "language": "اللغة",
+    "english": "English",
+    "arabic": "العربية",
+    "theme": "المظهر",
+    "themeSystem": "النظام",
+    "themeLight": "فاتح",
+    "themeDark": "داكن"
+  },
+  "expoUi": {
+    "title": "واجهة أصلية (Expo UI)",
+    "description": "مكوّنات مبنية بـ SwiftUI / Jetpack Compose عبر ‎@expo/ui.",
+    "filled": "ممتلئ",
+    "outlined": "محدد",
+    "text": "نصي",
+    "enableNotifications": "تفعيل الإشعارات",
+    "pressed": "تم الضغط على الزر"
+  }
+}
