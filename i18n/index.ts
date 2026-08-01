@@ -11,8 +11,8 @@ i18n.use(initReactI18next).init({
     en: { translation: en },
     ar: { translation: ar },
   },
-  lng: 'en',
-  fallbackLng: 'en',
+  lng: 'ar',
+  fallbackLng: 'ar',
   interpolation: { escapeValue: false },
 })
 
@@ -23,7 +23,7 @@ export const languageReady: Promise<void> = (async () => {
     AsyncStorage.getItem('language'),
     consumeRestartFlag(),
   ])
-  const lang = (saved === 'ar' || saved === 'en') ? saved : 'en'
+  const lang = (saved === 'ar' || saved === 'en') ? saved : 'ar'
   const shouldBeRTL = lang === 'ar'
 
   if (I18nManager.isRTL !== shouldBeRTL && !justRestarted) {

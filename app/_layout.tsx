@@ -9,16 +9,12 @@ import { I18nextProvider } from 'react-i18next'
 import * as SplashScreen from 'expo-splash-screen'
 import {
   useFonts,
-  Poppins_400Regular,
-  Poppins_400Regular_Italic,
-  Poppins_500Medium,
-  Poppins_600SemiBold,
-  Poppins_600SemiBold_Italic,
-  Poppins_300Light,
-  Poppins_300Light_Italic,
-  Poppins_200ExtraLight,
-  Poppins_200ExtraLight_Italic,
-} from '@expo-google-fonts/poppins'
+  Cairo_300Light,
+  Cairo_400Regular,
+  Cairo_500Medium,
+  Cairo_600SemiBold,
+  Cairo_700Bold,
+} from '@expo-google-fonts/cairo'
 import 'react-native-reanimated'
 import i18n, { languageReady } from '@/i18n'
 import { useThemeColors } from '@/hooks/use-theme-colors'
@@ -40,15 +36,11 @@ export default function RootLayout() {
   const colors = useThemeColors()
 
   const [fontsLoaded] = useFonts({
-    Poppins_400Regular,
-    Poppins_400Regular_Italic,
-    Poppins_500Medium,
-    Poppins_600SemiBold,
-    Poppins_600SemiBold_Italic,
-    Poppins_300Light,
-    Poppins_300Light_Italic,
-    Poppins_200ExtraLight,
-    Poppins_200ExtraLight_Italic,
+    Cairo_300Light,
+    Cairo_400Regular,
+    Cairo_500Medium,
+    Cairo_600SemiBold,
+    Cairo_700Bold,
   })
 
   const [langReady, setLangReady] = useState(false)

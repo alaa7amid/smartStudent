@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "react-native-template",
-    "slug": "react-native-template",
+    "name": "SmartFlow",
+    "slug": "smartflow",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "reactnativetemplate",
+    "scheme": "smartflow",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
@@ -31,9 +31,9 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#FAFAFF",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#14121F"
           }
         }
       ],

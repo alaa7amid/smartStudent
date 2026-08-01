@@ -13,8 +13,8 @@
   },
   "tabs": {
     "home": "Home",
-    "search": "Search",
-    "notifications": "Notifications",
+    "myQuizzes": "My Quizzes",
+    "ministryBank": "Ministry Bank",
     "profile": "Profile"
   },
   "settings": {
@@ -58,6 +58,30 @@
     "submittedTitle": "Submitted! 🎉",
     "submittedBody": "Auto-grading arrives in a later phase — this was a real quiz generated from your notebook!",
     "startNew": "Photograph another page"
+  },
+  "myQuizzes": {
+    "title": "My Quizzes",
+    "lastGenerated": "Last quiz you generated",
+    "questionsCount": "{{count}} questions",
+    "viewQuiz": "Open",
+    "emptyTitle": "No quizzes yet",
+    "emptyBody": "The first quiz you generate will show up here",
+    "captureNow": "Photograph your notebook now",
+    "saveHint": "Saving quizzes to your account arrives in a later phase — for now only your last quiz stays in memory"
+  },
+  "ministryBank": {
+    "title": "Ministry Exam Bank",
+    "description": "Archive of official past ministry exam questions + timed mock exams — exclusively for students in final grades (6th primary, 3rd intermediate, 6th secondary).",
+    "lockedTitle": "Needs an account and grade level",
+    "lockedBody": "This section appears automatically once you sign up and set your grade level — sign-up arrives in a later phase."
+  },
+  "profile": {
+    "title": "Profile",
+    "guestTitle": "Guest",
+    "guestBody": "Sign up to save your quizzes and unlock the ministry bank and loyalty rewards",
+    "signUp": "Sign up (coming soon)",
+    "appearance": "Appearance",
+    "language": "Language"
   },
   "expoUi": {
     "title": "Native UI (Expo UI)",

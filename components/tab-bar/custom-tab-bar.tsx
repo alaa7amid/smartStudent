@@ -15,10 +15,10 @@ interface TabDef {
 }
 
 const TAB_DEFS: TabDef[] = [
-  { name: 'index',         icon: 'home'         },
-  { name: 'search',        icon: 'search'       },
-  { name: 'notifications', icon: 'notifications' },
-  { name: 'profile',       icon: 'person'       },
+  { name: 'index',         icon: 'home'      },
+  { name: 'my-quizzes',    icon: 'document-text' },
+  { name: 'ministry-bank', icon: 'school'    },
+  { name: 'profile',       icon: 'person'    },
 ]
 
 interface CustomTabBarProps {

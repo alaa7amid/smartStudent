@@ -7,12 +7,12 @@ import { CustomTabBar } from '@/components/tab-bar/custom-tab-bar'
 import { useTabStore } from '@/store/tab-store'
 
 import HomeScreen from './index'
-import SearchScreen from './search'
-import NotificationsScreen from './notifications'
+import MyQuizzesScreen from './my-quizzes'
+import MinistryBankScreen from './ministry-bank'
 import ProfileScreen from './profile'
 
-const SCREENS = [HomeScreen, SearchScreen, NotificationsScreen, ProfileScreen]
-const TAB_PATHS = ['/', '/search', '/notifications', '/profile']
+const SCREENS = [HomeScreen, MyQuizzesScreen, MinistryBankScreen, ProfileScreen]
+const TAB_PATHS = ['/', '/my-quizzes', '/ministry-bank', '/profile']
 
 // Stable for the session — forceRTL changes require a restart anyway
 const isRTL = I18nManager.isRTL

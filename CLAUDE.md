@@ -1,6 +1,6 @@
-# React Native Template
+# SmartFlow (React Native / Expo)
 
-Opinionated Expo Router starter scaffolded from Tan's conventions: bilingual EN/AR + RTL, swipeable tabs, TanStack Query, RHF + zod, Zustand+SecureStore. Replace this header with your project name when you fork.
+طالب يصوّر صفحة من ملزمته → GPT-5 يحوّلها لاختبار تفاعلي → تصحيح مقيّد بنفس المصدر (Grounded). مبني على Expo Router starter مبني على قواعد Tan: بنفس البنية ثنائية اللغة EN/AR + RTL، تبويبات قابلة للسحب، TanStack Query، RHF + zod، Zustand+SecureStore. راجع `SmartFlow-PRD.md` و`SmartFlow-Tech-Requirements.md` بجذر المشروع للمنتج والمتطلبات الكاملة.
 
 ## Tech Stack
 
@@ -29,10 +29,10 @@ app/
 ├── modal.tsx
 └── (tabs)/
     ├── _layout.tsx      # Swipeable PagerView + CustomTabBar (4 tabs)
-    ├── index.tsx        # Home
-    ├── search.tsx
-    ├── notifications.tsx
-    └── profile.tsx
+    ├── index.tsx        # Home — capture CTA
+    ├── my-quizzes.tsx   # last generated quiz (real accounts/history: Phase 2)
+    ├── ministry-bank.tsx # locked placeholder — needs account + finished grade stage (Phase 2/4)
+    └── profile.tsx      # guest state + working theme/language switchers
 components/
 ├── ui/icon.tsx          # Ionicons wrapper — use this for ALL icons
 ├── ui/expo-ui-demo.tsx  # @expo/ui reference pattern (currently not mounted — see Native UI)
@@ -42,8 +42,8 @@ hooks/
 ├── use-debounce.ts      # generic debounced value (e.g. Search input → query key)
 └── ...                  # Add use-keyboard, etc. as needed
 constants/
-├── Colors.ts            # light/dark themes (neutral placeholder palette — swap for your brand)
-├── Typography.ts        # Poppins presets
+├── Colors.ts            # light/dark themes — هوية "نشيط وشبابي" (بنفسجي #6C5CE7 + كهرماني #FFB020)
+├── Typography.ts        # Cairo presets (عربي+لاتيني، بدون Italic)
 └── Spacing.ts           # xs/sm/md/lg/xl
 i18n/
 ├── index.ts             # i18next + RTL flow + restart on lang change
@@ -80,10 +80,10 @@ Add `services/` (axios + API), `services/auth.ts`, `store/auth-store.ts`, etc. w
 
 ## Design System
 
-- **Colors** — `constants/Colors.ts` exports `light` / `dark` schemes. Theme-tied props: `text`, `background`, `tint`, `tabIconDefault`, `tabIconSelected`, `card`, `border`, `secondary`, `subtle`, `surface`, `cardElevated`, `destructive`, `muted`, `onTint`. Ships with a neutral placeholder palette — every project sets its own; replace all values with your brand colors, just keep the same field names so consumers don't change.
+- **Colors** — `constants/Colors.ts` exports `light` / `dark` schemes. Theme-tied props: `text`, `background`, `tint`, `tabIconDefault`, `tabIconSelected`, `card`, `border`, `secondary`, `subtle`, `surface`, `cardElevated`, `destructive`, `muted`, `onTint`. SmartFlow brand: `tint` = vibrant violet (`#6C5CE7` light / `#7A6FF0` dark), `secondary` = amber (`#FFB020`/`#FFC24D`) reserved for Streak/rewards/celebratory moments (score cards, loyalty coupons) — don't use `secondary` for generic UI chrome.
 - **Typography** — `constants/Typography.ts` exports presets: `heading-lg/md/sm`, `body`, `body-md`, `caption`, `caption-sm`, `micro`, `input-label`. Spread into style: `style={{ ...Typography['heading-md'], color: colors.text }}`.
 - **Spacing** — `constants/Spacing.ts`: `xs:3, sm:5, md:10, lg:15, xl:20`.
-- **Fonts** — Poppins (loaded via `useFonts` from `@expo-google-fonts/poppins` in `app/_layout.tsx`). Variants: 200, 300, 400, 500, 600 (regular + italic).
+- **Fonts** — Cairo (loaded via `useFonts` from `@expo-google-fonts/cairo` in `app/_layout.tsx`). Weights: 300, 400, 500, 600, 700. Chosen over the template's original Poppins because Poppins has no Arabic glyphs — this product is Arabic-first, so a Latin-only font would silently fall back to the OS default for ~all visible text. No italic (unavailable for Cairo, and not idiomatic in Arabic typography anyway).
 
 ## Components
 
@@ -136,7 +136,7 @@ Quick reminders (the skill is authoritative):
 `components/tab-bar/custom-tab-bar.tsx` rules:
 
 - `TAB_DEFS` array drives icons; active swap is `${icon}-outline` → filled
-- Badges via the optional `badges` prop keyed by tab index (e.g., `{ 2: unreadCount }` for Notifications, the 3rd tab — order is Home=0, Search=1, Notifications=2, Profile=3)
+- Badges via the optional `badges` prop keyed by tab index — order is Home=0, My Quizzes=1, Ministry Bank=2, Profile=3. Not wired to real data yet (no accounts/notifications until Phase 2 — see `SmartFlow-Implementation-Plan.md`).
 - Badge position is RTL-aware: `...(isRTL ? { left: -6 } : { right: -6 })`
 - Respects safe-area inset via `useSafeAreaInsets()`; on Android it adds an extra `Spacing.md` gap above the system nav bar so icons don't sit flush against the OS buttons
 
