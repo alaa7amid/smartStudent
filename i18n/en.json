@@ -59,6 +59,20 @@
     "submittedBody": "Auto-grading arrives in a later phase — this was a real quiz generated from your notebook!",
     "startNew": "Photograph another page"
   },
+  "home": {
+    "howItWorksTitle": "How does SmartFlow work?",
+    "step1Title": "Photograph a page",
+    "step1Body": "From your notebook or textbook",
+    "step2Title": "Instant quiz",
+    "step2Body": "10 questions in seconds",
+    "step3Title": "Accurate grading",
+    "step3Body": "From your own page, no invented answers",
+    "tryExampleTitle": "Try a real example 👇",
+    "exampleBadge": "Example",
+    "exampleQuestion": "A 5 kg object accelerates at 2 m/s². What force is acting on it? (Physics)",
+    "exampleFeedbackCorrect": "✅ Correct! This is exactly how SmartFlow grades — instant and accurate.",
+    "exampleFeedbackWrong": "Just a simple illustration — real grading on your notebook explains exactly where you went wrong."
+  },
   "myQuizzes": {
     "title": "My Quizzes",
     "lastGenerated": "Last quiz you generated",

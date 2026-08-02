@@ -59,6 +59,20 @@
     "submittedBody": "التصحيح التلقائي بيجي بمرحلة قادمة — هذا أول اختبار مولَّد من ملزمتك فعلياً!",
     "startNew": "صوّر صفحة ثانية"
   },
+  "home": {
+    "howItWorksTitle": "شلون يشتغل SmartFlow؟",
+    "step1Title": "صوّر صفحة",
+    "step1Body": "من ملزمتك أو دفترك",
+    "step2Title": "اختبار فوري",
+    "step2Body": "10 أسئلة خلال ثواني",
+    "step3Title": "تصحيح دقيق",
+    "step3Body": "من نفس صفحتك، بدون اختلاق",
+    "tryExampleTitle": "جرّب مثال حقيقي 👇",
+    "exampleBadge": "مثال",
+    "exampleQuestion": "جسم كتلته 5 كغم يتسارع بمقدار 2 م/ث². ما مقدار القوة المؤثرة عليه؟ (فيزياء)",
+    "exampleFeedbackCorrect": "✅ صح! بالضبط هيك يصحّحلك SmartFlow — فوري ودقيق.",
+    "exampleFeedbackWrong": "هذا مثال بسيط بس للتوضيح — التصحيح الحقيقي على ملزمتك يشرحلك بالضبط وين غلطت."
+  },
   "myQuizzes": {
     "title": "اختباراتي",
     "lastGenerated": "آخر اختبار ولّدته",

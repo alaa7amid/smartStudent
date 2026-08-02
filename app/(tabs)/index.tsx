@@ -4,8 +4,17 @@ import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
 import { useThemeColors } from '@/hooks/use-theme-colors'
 import { Icon } from '@/components/ui/icon'
+import { ExampleQuestionCard } from '@/components/home/example-question-card'
 import { Typography } from '@/constants/Typography'
 import { Spacing } from '@/constants/Spacing'
+import type { ComponentProps } from 'react'
+import type { Ionicons } from '@expo/vector-icons'
+
+const STEPS: { icon: ComponentProps<typeof Ionicons>['name']; titleKey: string; bodyKey: string }[] = [
+  { icon: 'camera-outline', titleKey: 'home.step1Title', bodyKey: 'home.step1Body' },
+  { icon: 'sparkles-outline', titleKey: 'home.step2Title', bodyKey: 'home.step2Body' },
+  { icon: 'checkmark-done-outline', titleKey: 'home.step3Title', bodyKey: 'home.step3Body' },
+]
 
 export default function HomeScreen() {
   const { t } = useTranslation()
@@ -73,6 +82,57 @@ export default function HomeScreen() {
               {t('capture.takePhoto')}
             </Text>
           </TouchableOpacity>
+        </View>
+
+        <View style={{ gap: Spacing.md }}>
+          <Text style={{ ...Typography['heading-md'], color: colors.text }}>
+            {t('home.howItWorksTitle')}
+          </Text>
+
+          <View style={{ flexDirection: 'row', gap: Spacing.sm }}>
+            {STEPS.map((step) => (
+              <View
+                key={step.titleKey}
+                style={{
+                  flex: 1,
+                  alignItems: 'center',
+                  gap: Spacing.xs,
+                  backgroundColor: colors.surface,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  borderRadius: 16,
+                  borderCurve: 'continuous',
+                  padding: Spacing.md,
+                }}
+              >
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: colors.cardElevated,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Icon name={step.icon} size={18} color={colors.tint} />
+                </View>
+                <Text style={{ ...Typography.caption, color: colors.text, textAlign: 'center' }}>
+                  {t(step.titleKey)}
+                </Text>
+                <Text style={{ ...Typography['caption-sm'], color: colors.subtle, textAlign: 'center' }}>
+                  {t(step.bodyKey)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={{ gap: Spacing.md }}>
+          <Text style={{ ...Typography['heading-md'], color: colors.text }}>
+            {t('home.tryExampleTitle')}
+          </Text>
+          <ExampleQuestionCard />
         </View>
       </View>
     </ScrollView>

@@ -11,6 +11,7 @@ export const Colors = {
     card: '#F5F4FB',
     border: '#E6E3F5',
     secondary: '#FFB020', // كهرماني — Streak، المكافآت، الاحتفاء بالدرجات
+    onSecondary: '#1A1A2E', // نص/أيقونات فوق secondary — دائماً داكن (الكهرماني فاتح بالوضعين)
     subtle: '#6B6B85',
     surface: '#FFFFFF',
     cardElevated: '#F1EEFC',
@@ -27,6 +28,7 @@ export const Colors = {
     card: '#1E1B2E',
     border: '#2E2A45',
     secondary: '#FFC24D',
+    onSecondary: '#1A1A2E',
     subtle: '#9490B0',
     surface: '#1C1929',
     cardElevated: '#241F38',
