@@ -25,18 +25,28 @@ npx expo start --android
 
 ```
 app/
-├── _layout.tsx          # Root layout: providers (Query, i18n, GH, SafeArea), fonts, splash gating
+├── _layout.tsx          # Root layout: providers (Query, i18n, GH, SafeArea), fonts, splash gating (also gates on auth hydration)
 ├── modal.tsx
+├── referral.tsx         # FR-17 — invite code: share, copy, redeem
+├── capture/index.tsx    # FR-5/6/7.1 — camera/gallery + 3-level rescue ladder
+├── quiz/current.tsx     # FR-9/10/12/15 — play, grade, SOS notes, shareable score card
+├── (auth)/
+│   ├── phone.tsx        # FR-1 — phone entry
+│   ├── otp.tsx          # FR-1 — OTP verify → links demo quiz (FR-4) → routes by grade stage
+│   ├── grade-stage.tsx  # FR-2 — grade selection (drives ministry-bank visibility)
+│   └── guardian-consent.tsx # FR-3 — mandatory consent (users are minors)
 └── (tabs)/
-    ├── _layout.tsx      # Swipeable PagerView + CustomTabBar (4 tabs)
-    ├── index.tsx        # Home — capture CTA
-    ├── my-quizzes.tsx   # last generated quiz (real accounts/history: Phase 2)
-    ├── ministry-bank.tsx # locked placeholder — needs account + finished grade stage (Phase 2/4)
-    └── profile.tsx      # guest state + working theme/language switchers
+    ├── _layout.tsx      # Swipeable PagerView + CustomTabBar; tab list is DYNAMIC (see below)
+    ├── index.tsx        # Home — capture CTA, how-it-works, live example, streak badge
+    ├── my-quizzes.tsx   # FR-9 — saved quizzes from API; demo quiz + signup CTA for guests
+    ├── ministry-bank.tsx # FR-20 — curated external links (no in-app bank; see Q-7 in the SRS)
+    └── profile.tsx      # guest/logged-in state, referral entry, theme + language switchers
 components/
 ├── ui/icon.tsx          # Ionicons wrapper — use this for ALL icons
 ├── ui/expo-ui-demo.tsx  # @expo/ui reference pattern (currently not mounted — see Native UI)
-└── tab-bar/custom-tab-bar.tsx
+├── home/example-question-card.tsx # static interactive demo (labelled "مثال", not user data)
+├── quiz/score-card.tsx  # FR-15 — captured via react-native-view-shot; NO watermark by design
+└── tab-bar/custom-tab-bar.tsx     # takes a `tabs` prop — must stay in sync with the pager pages
 hooks/
 ├── use-theme-colors.ts  # preference (theme-store) + OS scheme → Colors[scheme]
 ├── use-debounce.ts      # generic debounced value (e.g. Search input → query key)
@@ -44,21 +54,32 @@ hooks/
 constants/
 ├── Colors.ts            # light/dark themes — هوية "نشيط وشبابي" (بنفسجي #6C5CE7 + كهرماني #FFB020)
 ├── Typography.ts        # Cairo presets (عربي+لاتيني، بدون Italic)
-└── Spacing.ts           # xs/sm/md/lg/xl
+├── Spacing.ts           # xs/sm/md/lg/xl
+└── ministry-links.ts    # external ministry-exam sources (unofficial — labelled as such in the UI)
 i18n/
-├── index.ts             # i18next + RTL flow + restart on lang change
+├── index.ts             # i18next + RTL flow + restart on lang change (default: ar)
 ├── en.json
 └── ar.json
 lib/
+├── api.ts               # axios instance + JWT request interceptor + 401 → clearSession
 ├── restart.ts           # expo-updates reload (DevSettings in dev)
 └── format-count.ts      # 1400 → "1.4K", 2.5M, etc. for counters/badges
+services/
+├── quiz.ts              # generate (image/text), grade
+└── student.ts           # profile, grade stage, consent, saved quizzes, referral
 store/
 ├── tab-store.ts         # Zustand store for active tab index
-└── theme-store.ts       # persisted light/dark/system preference (AsyncStorage)
+├── theme-store.ts       # persisted light/dark/system preference (AsyncStorage)
+├── auth-store.ts        # token + student (SecureStore) — gates the splash on hydration
+└── quiz-store.ts        # in-memory current quiz (demo before signup)
 .env.example             # copy to .env(.local); documents EXPO_PUBLIC_API_URL
 ```
 
-Add `services/` (axios + API), `services/auth.ts`, `store/auth-store.ts`, etc. when you need them — see "Data Layer" and "State Management" below for the patterns.
+**Backend lives in a separate repo**: `../smartflow-api/` (Fastify + Prisma + SQLite). `EXPO_PUBLIC_API_URL` must point at it — see its README/`.env.example`. Both `MOCK_AI` and `MOCK_OTP` there let you run the whole app without an OpenAI key or Twilio account.
+
+### Dynamic tabs (FR-2)
+
+`(tabs)/_layout.tsx` builds its tab list from `ALL_TABS` filtered by the student's `stageType`: **ministry-bank is hidden for `unfinished` grades**. The pager pages and `<CustomTabBar tabs={...}>` are driven by that same array — if you add a tab, add it to `ALL_TABS` only, never to the tab bar separately, or the indices desync.
 
 ## Code Conventions
 
@@ -136,7 +157,7 @@ Quick reminders (the skill is authoritative):
 `components/tab-bar/custom-tab-bar.tsx` rules:
 
 - `TAB_DEFS` array drives icons; active swap is `${icon}-outline` → filled
-- Badges via the optional `badges` prop keyed by tab index — order is Home=0, My Quizzes=1, Ministry Bank=2, Profile=3. Not wired to real data yet (no accounts/notifications until Phase 2 — see `SmartFlow-Implementation-Plan.md`).
+- Badges via the optional `badges` prop keyed by tab index. **Index the tabs actually rendered** — ministry-bank drops out for `unfinished` grades, so Profile is index 2 there and 3 otherwise. Not wired to real data yet (no notifications until a later phase — see `SmartFlow-Implementation-Plan.md`).
 - Badge position is RTL-aware: `...(isRTL ? { left: -6 } : { right: -6 })`
 - Respects safe-area inset via `useSafeAreaInsets()`; on Android it adds an extra `Spacing.md` gap above the system nav bar so icons don't sit flush against the OS buttons
 

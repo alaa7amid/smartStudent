@@ -1,16 +1,20 @@
-import { useEffect, useState } from 'react'
-import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { View, Text, TouchableOpacity, TextInput, ScrollView, ActivityIndicator } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
+import { useMutation } from '@tanstack/react-query'
+import { captureRef } from 'react-native-view-shot'
+import * as Sharing from 'expo-sharing'
 import { useThemeColors } from '@/hooks/use-theme-colors'
+import { Icon } from '@/components/ui/icon'
+import { ScoreCard } from '@/components/quiz/score-card'
 import { Typography } from '@/constants/Typography'
 import { Spacing } from '@/constants/Spacing'
 import { useQuizStore } from '@/store/quiz-store'
-import type { QuizQuestion } from '@/services/quiz'
+import { gradeQuiz, type QuizQuestion, type QuestionResult } from '@/services/quiz'
 
-// عرض تفاعلي (FR-9) لاختبار الديمو الحالي بالمتجر. التصحيح (FR-10) يجي
-// بالمرحلة 2 مع الحسابات — هنا بس تسجيل الإجابات وعرضها.
+// عرض تفاعلي (FR-9) + تصحيح حقيقي مقيّد بالمصدر (FR-10) لاختبار الديمو الحالي.
 export default function CurrentQuizScreen() {
   const { t } = useTranslation()
   const colors = useThemeColors()
@@ -19,7 +23,23 @@ export default function CurrentQuizScreen() {
   const quiz = useQuizStore((s) => s.currentQuiz)
 
   const [answers, setAnswers] = useState<Record<string, string>>({})
-  const [submitted, setSubmitted] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const scoreCardRef = useRef<View>(null)
+
+  const gradeMutation = useMutation({
+    mutationFn: () => gradeQuiz(quiz!.quizId, answers),
+    onError: () => setErrorMessage(t('common.networkError')),
+  })
+
+  // FR-15 — يلتقط كرت النتيجة كصورة ويفتح قائمة المشاركة النيتف.
+  const shareMutation = useMutation({
+    mutationFn: async () => {
+      if (!(await Sharing.isAvailableAsync())) throw new Error('sharing unavailable')
+      const uri = await captureRef(scoreCardRef, { format: 'png', quality: 1 })
+      await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: t('scoreCard.share') })
+    },
+    onError: () => setErrorMessage(t('scoreCard.shareFailed')),
+  })
 
   useEffect(() => {
     if (!quiz) router.replace('/capture')
@@ -31,39 +51,108 @@ export default function CurrentQuizScreen() {
     setAnswers((prev) => ({ ...prev, [questionId]: value }))
   }
 
-  if (submitted) {
+  const result = gradeMutation.data
+
+  if (result) {
+    if (result.status !== 'graded') {
+      return (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: colors.background,
+            padding: Spacing.xl,
+            paddingTop: insets.top + Spacing.xl,
+            justifyContent: 'center',
+            gap: Spacing.md,
+          }}
+        >
+          <Text style={{ ...Typography['heading-sm'], color: colors.destructive }}>{result.message}</Text>
+        </View>
+      )
+    }
+
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.background,
-          padding: Spacing.xl,
-          paddingTop: insets.top + Spacing.xl,
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: Spacing.md,
-        }}
+      <ScrollView
+        style={{ flex: 1, backgroundColor: colors.background }}
+        contentContainerStyle={{ padding: Spacing.xl, paddingTop: insets.top + Spacing.xl, gap: Spacing.lg }}
       >
-        <Text style={{ ...Typography['heading-lg'], color: colors.text, textAlign: 'center' }}>
-          {t('quiz.submittedTitle')}
+        <ScoreCard ref={scoreCardRef} score={result.score} total={result.total} subject={quiz.subject} />
+
+        <TouchableOpacity
+          onPress={() => {
+            setErrorMessage(null)
+            shareMutation.mutate()
+          }}
+          disabled={shareMutation.isPending}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: Spacing.sm,
+            backgroundColor: colors.secondary,
+            paddingVertical: Spacing.lg,
+            borderRadius: 16,
+            borderCurve: 'continuous',
+          }}
+        >
+          {shareMutation.isPending
+            ? <ActivityIndicator color={colors.onSecondary} />
+            : <Icon name="share-social" size={20} color={colors.onSecondary} />}
+          <Text style={{ ...Typography['body-md'], color: colors.onSecondary }}>
+            {t('scoreCard.share')}
+          </Text>
+        </TouchableOpacity>
+
+        {result.currentStreak != null && result.currentStreak > 0 && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: Spacing.sm,
+              backgroundColor: colors.cardElevated,
+              borderRadius: 14,
+              borderCurve: 'continuous',
+              padding: Spacing.md,
+            }}
+          >
+            <Text style={{ fontSize: 18 }}>🔥</Text>
+            <Text style={{ ...Typography.body, color: colors.text }}>
+              {t('quiz.streakCount', { count: result.currentStreak })}
+            </Text>
+          </View>
+        )}
+
+        {result.sosNotes.length > 0 && <SosCard notes={result.sosNotes} colors={colors} t={t} />}
+
+        {errorMessage && (
+          <Text style={{ ...Typography.caption, color: colors.destructive }}>{errorMessage}</Text>
+        )}
+
+        <Text style={{ ...Typography['heading-sm'], color: colors.text, marginTop: Spacing.md }}>
+          {t('quiz.reviewTitle')}
         </Text>
-        <Text style={{ ...Typography.body, color: colors.subtle, textAlign: 'center' }}>
-          {t('quiz.submittedBody')}
-        </Text>
-        <View style={{ height: Spacing.lg }} />
+
+        {result.perQuestion.map((r, i) => {
+          const question = quiz.questions.find((q) => q.id === r.questionId)
+          if (!question) return null
+          return <ResultCard key={r.questionId} index={i} question={question} result={r} colors={colors} t={t} />
+        })}
+
         <TouchableOpacity
           onPress={() => router.replace('/capture')}
           style={{
             backgroundColor: colors.tint,
             paddingVertical: Spacing.lg,
-            paddingHorizontal: Spacing.xl,
             borderRadius: 16,
             borderCurve: 'continuous',
+            alignItems: 'center',
+            marginTop: Spacing.md,
           }}
         >
           <Text style={{ ...Typography['body-md'], color: colors.onTint }}>{t('quiz.startNew')}</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     )
   }
 
@@ -86,21 +175,133 @@ export default function CurrentQuizScreen() {
         />
       ))}
 
+      {errorMessage && (
+        <Text style={{ ...Typography.caption, color: colors.destructive }}>{errorMessage}</Text>
+      )}
+
       <TouchableOpacity
-        onPress={() => setSubmitted(true)}
+        onPress={() => {
+          setErrorMessage(null)
+          gradeMutation.mutate()
+        }}
+        disabled={gradeMutation.isPending}
         style={{
-          backgroundColor: colors.tint,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: Spacing.sm,
+          backgroundColor: gradeMutation.isPending ? colors.muted : colors.tint,
           paddingVertical: Spacing.lg,
           paddingHorizontal: Spacing.xl,
           borderRadius: 16,
           borderCurve: 'continuous',
-          alignItems: 'center',
           marginTop: Spacing.md,
         }}
       >
-        <Text style={{ ...Typography['body-md'], color: colors.onTint }}>{t('quiz.submit')}</Text>
+        {gradeMutation.isPending && <ActivityIndicator color={colors.onTint} />}
+        <Text style={{ ...Typography['body-md'], color: colors.onTint }}>
+          {gradeMutation.isPending ? t('quiz.grading') : t('quiz.submit')}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
+  )
+}
+
+// FR-12 — SOS Micro-Notes: تظهر تلقائياً عند درجة < 5/10، مبنية حصراً على
+// الأسئلة اللي غلط فيها الطالب (مو معرفة عامة).
+function SosCard({
+  notes,
+  colors,
+  t,
+}: {
+  notes: string[]
+  colors: ReturnType<typeof useThemeColors>
+  t: (key: string, opts?: Record<string, unknown>) => string
+}) {
+  return (
+    <View
+      style={{
+        gap: Spacing.md,
+        backgroundColor: colors.cardElevated,
+        borderWidth: 1,
+        borderColor: colors.secondary,
+        borderRadius: 20,
+        borderCurve: 'continuous',
+        padding: Spacing.lg,
+      }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+        <Icon name="bulb" size={20} color={colors.secondary} />
+        <Text style={{ ...Typography['heading-sm'], color: colors.text }}>{t('quiz.sosTitle')}</Text>
+      </View>
+      <Text style={{ ...Typography.caption, color: colors.subtle }}>{t('quiz.sosSubtitle')}</Text>
+
+      {notes.map((note, i) => (
+        <View key={note} style={{ flexDirection: 'row', gap: Spacing.sm, alignItems: 'flex-start' }}>
+          <View
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: 11,
+              backgroundColor: colors.secondary,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text style={{ ...Typography['caption-sm'], color: colors.onSecondary }}>{i + 1}</Text>
+          </View>
+          <Text style={{ ...Typography.body, color: colors.text, flex: 1 }}>{note}</Text>
+        </View>
+      ))}
+    </View>
+  )
+}
+
+function ResultCard({
+  index,
+  question,
+  result,
+  colors,
+  t,
+}: {
+  index: number
+  question: QuizQuestion
+  result: QuestionResult
+  colors: ReturnType<typeof useThemeColors>
+  t: (key: string, opts?: Record<string, unknown>) => string
+}) {
+  return (
+    <View
+      style={{
+        gap: Spacing.sm,
+        backgroundColor: colors.cardElevated,
+        borderWidth: 1,
+        borderColor: result.correct ? colors.tint : colors.destructive,
+        padding: Spacing.lg,
+        borderRadius: 16,
+        borderCurve: 'continuous',
+      }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+        <Icon
+          name={result.correct ? 'checkmark-circle' : 'close-circle'}
+          size={20}
+          color={result.correct ? colors.tint : colors.destructive}
+        />
+        <Text style={{ ...Typography.caption, color: colors.subtle }}>
+          {t('quiz.questionOf', { current: index + 1, total: '' })}
+        </Text>
+      </View>
+      <Text style={{ ...Typography['body-md'], color: colors.text }}>{question.prompt}</Text>
+      <Text style={{ ...Typography.body, color: colors.subtle }}>
+        {t('quiz.yourAnswer')}: {result.studentAnswer || t('quiz.noAnswer')}
+      </Text>
+      {!result.correct && (
+        <Text style={{ ...Typography.body, color: colors.tint }}>
+          {t('quiz.correctAnswer')}: {result.correctAnswer}
+        </Text>
+      )}
+    </View>
   )
 }
 

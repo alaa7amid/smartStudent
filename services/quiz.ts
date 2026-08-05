@@ -10,6 +10,7 @@ export interface QuizQuestion {
 
 export interface QuizReady {
   status: 'ready'
+  quizId: string
   subject: string | null
   questions: QuizQuestion[]
   modelUsed: string
@@ -48,5 +49,37 @@ export async function generateQuiz(imageUri: string): Promise<GenerateQuizRespon
 // FR-7.1 (المستوى 3) — ملاذ أخير لما الخط يفشل مرتين: الطالب يكتب النص يدوياً.
 export async function generateQuizFromText(text: string): Promise<GenerateQuizResponse> {
   const { data } = await api.post<GenerateQuizResponse>('/quiz/generate-from-text', { text })
+  return data
+}
+
+export interface QuestionResult {
+  questionId: string
+  correct: boolean
+  correctAnswer: string
+  studentAnswer: string
+}
+
+export interface GradeQuizSuccess {
+  status: 'graded'
+  score: number
+  total: number
+  perQuestion: QuestionResult[]
+  sosNotes: string[] // FR-12 — يمتلئ فقط عند درجة < 5/10
+  currentStreak: number | null // FR-16 — null للطلاب غير المسجَّلين
+}
+
+export interface GradeQuizFailure {
+  status: 'invalid_input' | 'not_found' | 'failed_ai'
+  message: string
+}
+
+export type GradeQuizResponse = GradeQuizSuccess | GradeQuizFailure
+
+// FR-10 — التصحيح المقيّد بالمصدر. answers مفاتيحها questionId.
+export async function gradeQuiz(
+  quizId: string,
+  answers: Record<string, string>,
+): Promise<GradeQuizResponse> {
+  const { data } = await api.post<GradeQuizResponse>(`/quiz/${quizId}/grade`, { answers })
   return data
 }

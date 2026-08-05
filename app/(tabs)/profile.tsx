@@ -1,11 +1,13 @@
 import { ScrollView, View, Text, TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
+import { useRouter } from 'expo-router'
 import { useThemeColors } from '@/hooks/use-theme-colors'
 import { Icon } from '@/components/ui/icon'
 import { Typography } from '@/constants/Typography'
 import { Spacing } from '@/constants/Spacing'
 import { useThemeStore, type ThemePreference } from '@/store/theme-store'
+import { useAuthStore } from '@/store/auth-store'
 import { changeLanguage } from '@/i18n'
 
 const THEME_OPTIONS: { value: ThemePreference; labelKey: string; icon: 'phone-portrait-outline' | 'sunny-outline' | 'moon-outline' }[] = [
@@ -18,8 +20,11 @@ export default function ProfileScreen() {
   const { t, i18n } = useTranslation()
   const colors = useThemeColors()
   const insets = useSafeAreaInsets()
+  const router = useRouter()
   const preference = useThemeStore((s) => s.preference)
   const setPreference = useThemeStore((s) => s.setPreference)
+  const student = useAuthStore((s) => s.student)
+  const clearSession = useAuthStore((s) => s.clearSession)
 
   return (
     <ScrollView
@@ -28,7 +33,6 @@ export default function ProfileScreen() {
     >
       <Text style={{ ...Typography['heading-lg'], color: colors.text }}>{t('profile.title')}</Text>
 
-      {/* حالة الزائر — لا حسابات بعد (المرحلة 2). صادقة بدل بيانات وهمية. */}
       <View
         style={{
           flexDirection: 'row',
@@ -45,31 +49,76 @@ export default function ProfileScreen() {
             width: 48,
             height: 48,
             borderRadius: 24,
-            backgroundColor: colors.muted,
+            backgroundColor: student ? colors.tint : colors.muted,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Icon name="person-outline" size={24} color={colors.subtle} />
+          <Icon name="person-outline" size={24} color={student ? colors.onTint : colors.subtle} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ ...Typography['body-md'], color: colors.text }}>{t('profile.guestTitle')}</Text>
-          <Text style={{ ...Typography.caption, color: colors.subtle }}>{t('profile.guestBody')}</Text>
+          <Text style={{ ...Typography['body-md'], color: colors.text }}>
+            {student ? student.phone : t('profile.guestTitle')}
+          </Text>
+          <Text style={{ ...Typography.caption, color: colors.subtle }}>
+            {student ? t('profile.loggedInBody') : t('profile.guestBody')}
+          </Text>
         </View>
       </View>
 
-      <TouchableOpacity
-        disabled
-        style={{
-          alignItems: 'center',
-          backgroundColor: colors.muted,
-          paddingVertical: Spacing.md,
-          borderRadius: 14,
-          borderCurve: 'continuous',
-        }}
-      >
-        <Text style={{ ...Typography['body-md'], color: colors.subtle }}>{t('profile.signUp')}</Text>
-      </TouchableOpacity>
+      {/* FR-17 — دعوة صديق: متاحة للمسجَّلين فقط (تحتاج كود مرتبط بحساب). */}
+      {student && (
+        <TouchableOpacity
+          onPress={() => router.push('/referral')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: Spacing.md,
+            backgroundColor: colors.cardElevated,
+            borderRadius: 16,
+            borderCurve: 'continuous',
+            padding: Spacing.lg,
+          }}
+        >
+          <Icon name="gift-outline" size={22} color={colors.secondary} />
+          <View style={{ flex: 1 }}>
+            <Text style={{ ...Typography['body-md'], color: colors.text }}>{t('referral.title')}</Text>
+            <Text style={{ ...Typography['caption-sm'], color: colors.subtle }}>
+              {t('referral.subtitle')}
+            </Text>
+          </View>
+          <Icon name="chevron-forward" size={18} color={colors.subtle} />
+        </TouchableOpacity>
+      )}
+
+      {student ? (
+        <TouchableOpacity
+          onPress={clearSession}
+          style={{
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: colors.destructive,
+            paddingVertical: Spacing.md,
+            borderRadius: 14,
+            borderCurve: 'continuous',
+          }}
+        >
+          <Text style={{ ...Typography['body-md'], color: colors.destructive }}>{t('profile.logout')}</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          onPress={() => router.push('/(auth)/phone')}
+          style={{
+            alignItems: 'center',
+            backgroundColor: colors.tint,
+            paddingVertical: Spacing.md,
+            borderRadius: 14,
+            borderCurve: 'continuous',
+          }}
+        >
+          <Text style={{ ...Typography['body-md'], color: colors.onTint }}>{t('profile.signUp')}</Text>
+        </TouchableOpacity>
+      )}
 
       {/* المظهر — وظيفي فعلياً، مربوط بـ theme-store */}
       <View style={{ gap: Spacing.sm }}>

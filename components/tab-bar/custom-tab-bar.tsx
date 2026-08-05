@@ -9,25 +9,21 @@ import type { Ionicons } from '@expo/vector-icons'
 
 type IoniconName = ComponentProps<typeof Ionicons>['name']
 
-interface TabDef {
+export interface TabDef {
   name: string
   icon: IoniconName
 }
 
-const TAB_DEFS: TabDef[] = [
-  { name: 'index',         icon: 'home'      },
-  { name: 'my-quizzes',    icon: 'document-text' },
-  { name: 'ministry-bank', icon: 'school'    },
-  { name: 'profile',       icon: 'person'    },
-]
-
 interface CustomTabBarProps {
+  // تُمرَّر من (tabs)/_layout حتى تبقى مطابقة لصفحات الـ PagerView — عددها
+  // يتغيّر حسب مرحلة الطالب (بنك الوزاري للمنتهية فقط، FR-2).
+  tabs: TabDef[]
   activeIndex: number
   onTabPress: (index: number) => void
   badges?: Partial<Record<number, number>>
 }
 
-export function CustomTabBar({ activeIndex, onTabPress, badges }: CustomTabBarProps) {
+export function CustomTabBar({ tabs, activeIndex, onTabPress, badges }: CustomTabBarProps) {
   const colors = useThemeColors()
   const insets = useSafeAreaInsets()
   // Android: insets.bottom equals the system nav bar height exactly, so the
@@ -46,7 +42,7 @@ export function CustomTabBar({ activeIndex, onTabPress, badges }: CustomTabBarPr
       paddingHorizontal: 10,
       alignItems: 'flex-end',
     }}>
-      {TAB_DEFS.map((tab, i) => {
+      {tabs.map((tab, i) => {
         const active = activeIndex === i
         const badge = badges?.[i]
         return (

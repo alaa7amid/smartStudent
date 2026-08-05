@@ -19,6 +19,7 @@ import 'react-native-reanimated'
 import i18n, { languageReady } from '@/i18n'
 import { useThemeColors } from '@/hooks/use-theme-colors'
 import { useThemeStore } from '@/store/theme-store'
+import { useAuthStore } from '@/store/auth-store'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -51,12 +52,15 @@ export default function RootLayout() {
   // Gate on theme rehydration too, so the persisted light/dark preference is
   // applied before first paint (no flash of the wrong theme).
   const themeHydrated = useThemeStore((s) => s.hasHydrated)
+  // نفس السبب — نعرف حالة تسجيل الدخول (توكن محفوظ أو لا) قبل أول رسم، حتى
+  // ما تومض شاشة "زائر" لحظة قبل ما تنقلب لحساب مسجَّل (أو العكس).
+  const authHydrated = useAuthStore((s) => s.hasHydrated)
 
   useEffect(() => {
-    if (fontsLoaded && langReady && themeHydrated) SplashScreen.hideAsync()
-  }, [fontsLoaded, langReady, themeHydrated])
+    if (fontsLoaded && langReady && themeHydrated && authHydrated) SplashScreen.hideAsync()
+  }, [fontsLoaded, langReady, themeHydrated, authHydrated])
 
-  if (!fontsLoaded || !langReady || !themeHydrated)
+  if (!fontsLoaded || !langReady || !themeHydrated || !authHydrated)
     return <View style={{ flex: 1, backgroundColor: colors.background }} />
 
   return (
@@ -69,6 +73,7 @@ export default function RootLayout() {
               contentStyle: { backgroundColor: colors.background },
             }}>
               <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
               <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
             </Stack>
             <StatusBar style="auto" />

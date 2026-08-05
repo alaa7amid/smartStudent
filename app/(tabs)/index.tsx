@@ -2,11 +2,14 @@ import { ScrollView, View, Text, TouchableOpacity } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'expo-router'
+import { useQuery } from '@tanstack/react-query'
 import { useThemeColors } from '@/hooks/use-theme-colors'
 import { Icon } from '@/components/ui/icon'
 import { ExampleQuestionCard } from '@/components/home/example-question-card'
 import { Typography } from '@/constants/Typography'
 import { Spacing } from '@/constants/Spacing'
+import { useAuthStore } from '@/store/auth-store'
+import { fetchProfile } from '@/services/student'
 import type { ComponentProps } from 'react'
 import type { Ionicons } from '@expo/vector-icons'
 
@@ -21,6 +24,15 @@ export default function HomeScreen() {
   const colors = useThemeColors()
   const insets = useSafeAreaInsets()
   const router = useRouter()
+  const student = useAuthStore((s) => s.student)
+
+  const profileQuery = useQuery({
+    queryKey: ['profile'],
+    queryFn: fetchProfile,
+    enabled: student != null,
+  })
+
+  const streak = profileQuery.data?.currentStreak ?? 0
 
   return (
     <ScrollView
@@ -28,9 +40,31 @@ export default function HomeScreen() {
       contentContainerStyle={{ flexGrow: 1, padding: Spacing.xl, paddingTop: insets.top + Spacing.lg }}
     >
       <View style={{ gap: Spacing.xl }}>
-        <Text style={{ ...Typography['heading-lg'], color: colors.text }}>
-          {t('tabs.home')}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text style={{ ...Typography['heading-lg'], color: colors.text }}>
+            {t('tabs.home')}
+          </Text>
+
+          {/* FR-16 — عدّاد السلسلة يظهر فقط لما تبدأ فعلاً (يوم واحد على الأقل). */}
+          {streak > 0 && (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: Spacing.xs,
+                backgroundColor: colors.secondary,
+                borderRadius: 999,
+                paddingVertical: 4,
+                paddingHorizontal: Spacing.md,
+              }}
+            >
+              <Text style={{ fontSize: 14 }}>🔥</Text>
+              <Text style={{ ...Typography.caption, color: colors.onSecondary, fontVariant: ['tabular-nums'] }}>
+                {streak}
+              </Text>
+            </View>
+          )}
+        </View>
 
         <View
           style={{
